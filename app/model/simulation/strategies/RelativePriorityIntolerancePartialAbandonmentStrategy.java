@@ -28,7 +28,7 @@ public class RelativePriorityIntolerancePartialAbandonmentStrategy implements Si
         //Si hay un B atendiendose, se encola en la cola normal
         //Si hay un A atendiendose, se encola en la cola normal
 
-        final Customer arrivalCustomer = event.getCustomer();
+        Customer arrivalCustomer = event.getCustomer();
         addCustomerToQueue(simulation, arrivalCustomer);
         attendNext(event, simulation);
         final Customer currentCustomer = simulation.getCurrentCustomer();
@@ -51,7 +51,7 @@ public class RelativePriorityIntolerancePartialAbandonmentStrategy implements Si
         if (simulation.getCurrentCustomer() == null)
             if (simulation.peekPriorityQueue() != null)
             attendCustomer(simulation, event, simulation.pollPriorityQueue());
-        else if (simulation.peekPriorityQueue() != null)
+        else if (simulation.peekCustomerQueue() != null)
                 attendCustomer(simulation, event, simulation.pollCustomerQueue());
     }
 
@@ -59,10 +59,12 @@ public class RelativePriorityIntolerancePartialAbandonmentStrategy implements Si
         //Primero, seteo el tiempo de espera del cliente que va a ser atendido
         //Despues, agrego el evento de salida del cliente que termino de atenderse
         //Finalmente, seteo el cliente que acaba de llegar como el cliente que se esta atendiendo
+        event.attentionChanelStatus(OCUPADO);
         nextCustomer.waitTime(event.getInitTime() - nextCustomer.getArrivalTime());
         final double mu = Mathematics.getDurationChannel(nextCustomer.getType() == A ? simulation.getMuA() : simulation.getMuB());
         final Event bExit = new Event(SALIDA, nextCustomer, event.getInitTime() + mu, false);
-        event.attentionChanelStatus(OCUPADO);
+
+
         simulation.addEventAndSort(bExit);
         simulation.setCurrentCustomer(nextCustomer);
     }
